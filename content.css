@@ -1,0 +1,856 @@
+/* Arch2Tensor Enhanced Styles - Content Script */
+
+/* SAFETY RULE: Prevent any extension artifacts when disabled */
+#arch-tooltip:empty,
+#arch-hud:empty,
+#arch-compare-panel:empty,
+#arch-search-overlay:empty,
+#arch-graph-modal:empty,
+#arch-keybind-guide:empty {
+    display: none !important;
+    border: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    position: fixed !important;
+    pointer-events: none !important;
+}
+
+/* Highlight Styles */
+.arch-highlight {
+    background: linear-gradient(120deg, rgba(255,224,178,0.92) 0%, rgba(255,204,128,0.92) 100%) !important;
+    border-bottom: 2px dashed #fb8c00 !important;
+    cursor: help !important;
+    font-weight: 700 !important;
+    padding: 1px 4px !important;
+    border-radius: 3px !important;
+    color: #222 !important;
+    transition: all 0.2s ease !important;
+    position: relative !important;
+    will-change: transform !important;
+    z-index: 1000 !important;
+}
+
+.arch-highlight.conf-high {
+    border-bottom-color: #fb8c00 !important;
+    box-shadow: inset 0 0 8px rgba(251,140,0,0.1), 0 0 0 1px rgba(251,140,0,0.15) !important;
+}
+
+.arch-highlight.conf-medium {
+    border-bottom-style: dotted !important;
+    border-bottom-color: #f9a825 !important;
+    background: linear-gradient(120deg, rgba(255,249,196,0.92) 0%, rgba(255,238,88,0.6) 100%) !important;
+    box-shadow: inset 0 0 6px rgba(249,168,37,0.1), 0 0 0 1px rgba(249,168,37,0.12) !important;
+}
+
+.arch-highlight.conf-low {
+    border-bottom-style: dotted !important;
+    border-bottom-color: #fbc02d !important;
+    background: linear-gradient(120deg, rgba(255,253,231,0.85) 0%, rgba(255,248,150,0.6) 100%) !important;
+    box-shadow: inset 0 0 4px rgba(251,192,45,0.08) !important;
+}
+
+.arch-highlight:hover,
+.arch-highlight--active {
+    background: linear-gradient(120deg, #ffd699 0%, #ffb74d 100%) !important;
+    border-bottom-color: #ff7043 !important;
+    box-shadow: 0 2px 12px rgba(255,112,67,0.4), inset 0 0 6px rgba(255,112,67,0.1) !important;
+    transform: translateY(-2px) !important;
+}
+
+.arch-highlight.pinned {
+    animation: archPinPulse 1.5s ease-in-out infinite !important;
+}
+
+@keyframes archPinPulse {
+    0%, 100% { box-shadow: 0 0 0 2px #4fc3f7, inset 0 0 6px rgba(79,195,247,0.1); }
+    50% { box-shadow: 0 0 0 4px rgba(79,195,247,0.5), inset 0 0 6px rgba(79,195,247,0.1); }
+}
+
+/* Tooltip Styles */
+#arch-tooltip {
+    display: none;
+    position: fixed !important;
+    background: #141414 !important;
+    color: #d4d4d4 !important;
+    border: 1px solid #2a2a2a !important;
+    border-radius: 14px !important;
+    padding: 20px !important;
+    width: 520px !important;
+    max-height: 85vh !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.9), 0 0 0 1px rgba(79,195,247,0.15) !important;
+    z-index: 2147483647 !important; /* Max z-index to stay on top of everything */
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+    animation: archTooltipIn 0.2s cubic-bezier(0.22,1,0.36,1) !important;
+    box-sizing: border-box !important;
+    text-align: left !important;
+}
+
+@keyframes archTooltipIn {
+    from { opacity: 0; transform: translateY(-8px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* #arch-tooltip::-webkit-scrollbar { width: 5px !important; }
+#arch-tooltip::-webkit-scrollbar-track { background: transparent !important; }
+#arch-tooltip::-webkit-scrollbar-thumb { background: rgba(79,195,247,0.2) !important; border-radius: 3px !important; }
+#arch-tooltip::-webkit-scrollbar-thumb:hover { background: rgba(79,195,247,0.4) !important; } */
+
+#arch-tooltip .arch-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+    margin-bottom: 16px !important;
+    gap: 12px !important;
+    padding-bottom: 12px !important;
+    border-bottom: 1px solid rgba(79,195,247,0.08) !important;
+}
+
+#arch-tooltip .arch-title-container { flex: 1 !important; }
+
+#arch-tooltip .arch-title {
+    font-size: 18px !important;
+    font-weight: 800 !important;
+    color: #4fc3f7 !important;
+    margin-bottom: 4px !important;
+    letter-spacing: -0.3px !important;
+    line-height: 1.2 !important;
+}
+
+#arch-tooltip .arch-header-actions {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+    align-items: flex-end !important;
+}
+
+#arch-tooltip .tooltip-action-btn {
+    background: rgba(255,255,255,0.05) !important;
+    border: 1px solid #333 !important;
+    color: #aaa !important;
+    border-radius: 5px !important;
+    padding: 5px 8px !important;
+    font-size: 11px !important;
+    cursor: pointer !important;
+    transition: all 0.15s !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+    font-weight: 600 !important;
+}
+
+#arch-tooltip .tooltip-action-btn:hover {
+    background: rgba(79,195,247,0.12) !important;
+    border-color: #4fc3f7 !important;
+    color: #4fc3f7 !important;
+    transform: translateY(-1px) !important;
+}
+
+#arch-tooltip .confidence-bar-wrap {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin: 10px 0 !important;
+    height: 5px !important;
+    background: #1a1a1a !important;
+    border-radius: 2px !important;
+    overflow: hidden !important;
+    position: relative !important;
+}
+
+#arch-tooltip .confidence-bar {
+    height: 100% !important;
+    background: linear-gradient(90deg, #4fc3f7, #81d4fa) !important;
+    border-radius: 2px !important;
+}
+
+#arch-tooltip .confidence-label {
+    font-size: 10px !important;
+    color: #555 !important;
+    letter-spacing: 0.5px !important;
+    font-weight: 600 !important;
+}
+
+#arch-tooltip .arch-description {
+    font-size: 12px !important;
+    color: #8a9bb0 !important;
+    line-height: 1.6 !important;
+    margin-bottom: 12px !important;
+}
+
+#arch-tooltip .arch-repo {
+    display: inline-block !important;
+    color: #81c784 !important;
+    font-size: 11px !important;
+    text-decoration: none !important;
+    background: rgba(129,199,132,0.1) !important;
+    border: 1px solid rgba(129,199,132,0.3) !important;
+    padding: 6px 12px !important;
+    border-radius: 6px !important;
+    transition: all 0.2s !important;
+    white-space: nowrap !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.3px !important;
+    margin: 10px 0 !important;
+}
+
+#arch-tooltip .arch-repo:hover {
+    background: rgba(129,199,132,0.2) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(129,199,132,0.18) !important;
+}
+
+#arch-tooltip .arch-meta {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 12px !important;
+    margin: 14px 0 !important;
+    padding: 14px !important;
+    background: rgba(79,195,247,0.06) !important;
+    border-radius: 8px !important;
+    border: 1px solid rgba(79,195,247,0.12) !important;
+}
+
+#arch-tooltip .meta-full { grid-column: 1 / -1 !important; }
+#arch-tooltip .meta-item { display: flex !important; flex-direction: column !important; gap: 4px !important; }
+
+#arch-tooltip .meta-label {
+    font-size: 9px !important;
+    color: #4fc3f7 !important;
+    text-transform: uppercase !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.8px !important;
+}
+
+#arch-tooltip .meta-value {
+    font-size: 12px !important;
+    color: #e3f2fd !important;
+    font-weight: 600 !important;
+}
+
+#arch-tooltip .use-cases { margin: 14px 0 !important; }
+
+#arch-tooltip .use-cases-label {
+    font-size: 10px !important;
+    color: #4fc3f7 !important;
+    text-transform: uppercase !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.8px !important;
+    margin-bottom: 8px !important;
+    display: block !important;
+}
+
+#arch-tooltip .use-cases-list { display: flex !important; flex-wrap: wrap !important; gap: 6px !important; }
+
+#arch-tooltip .alias-list { 
+    display: flex !important; 
+    flex-wrap: wrap !important; 
+    gap: 6px !important; 
+    margin-top: 4px !important;
+}
+
+#arch-tooltip .use-case-badge {
+    background: rgba(255,112,67,0.14) !important;
+    color: #ff8a65 !important;
+    padding: 4px 10px !important;
+    border-radius: 12px !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    border: 1px solid rgba(255,112,67,0.28) !important;
+    transition: all 0.15s !important;
+}
+
+#arch-tooltip .code-container { position: relative !important; margin-top: 14px !important; }
+
+#arch-tooltip .code-toolbar {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    background: #0d0d0d !important;
+    border: 1px solid #222 !important;
+    border-bottom: none !important;
+    border-radius: 6px 6px 0 0 !important;
+    padding: 8px 12px !important;
+}
+
+#arch-tooltip .code-lang {
+    font-size: 10px !important;
+    color: #666 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.8px !important;
+    font-weight: 600 !important;
+}
+
+#arch-tooltip .arch-code {
+    background: #0d0d0d !important;
+    padding: 14px !important;
+    border-radius: 0 0 6px 6px !important;
+    font-size: 12px !important;
+    overflow-x: auto !important;
+    margin: 0 !important;
+    color: #9cdcfe !important;
+    border: 1px solid #222 !important;
+    border-top: none !important;
+    line-height: 1.6 !important;
+}
+
+#arch-tooltip .arch-code code {
+    background: transparent !important;
+    color: inherit !important;
+    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace !important;
+    font-size: inherit !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    white-space: pre !important;
+    display: block !important;
+}
+
+#arch-hud *, #arch-compare-panel *, #arch-search-overlay *, #arch-graph-modal * {
+    box-sizing: border-box !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1.5 !important;
+}
+
+#arch-hud {
+    display: none;
+    position: fixed !important;
+    bottom: 24px !important;
+    right: 24px !important;
+    width: 320px !important;
+    max-height: 480px !important;
+    background: #0d0d0d !important;
+    border: 1px solid #333 !important;
+    border-radius: 12px !important;
+    z-index: 2147483647 !important;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.8), 0 0 0 1px rgba(79,195,247,0.2) !important;
+    color: #e0e0e0 !important;
+    animation: archSlideUp 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+@keyframes archSlideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+#arch-hud .hud-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 14px 16px !important;
+    background: #141414 !important;
+    border-bottom: 1px solid #2a2a2a !important;
+    border-radius: 12px 12px 0 0 !important;
+    cursor: grab !important;
+}
+
+#arch-hud .hud-header:active { cursor: grabbing !important; }
+
+#arch-hud .hud-logo {
+    font-size: 14px !important;
+    font-weight: 800 !important;
+    color: #4fc3f7 !important;
+    letter-spacing: 0.5px !important;
+}
+
+#arch-hud .hud-controls { display: flex !important; gap: 6px !important; }
+
+#arch-hud .hud-btn {
+    background: transparent !important;
+    border: 1px solid #333 !important;
+    color: #aaa !important;
+    border-radius: 6px !important;
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 12px !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.2s ease !important;
+}
+
+#arch-hud .hud-btn:hover { 
+    border-color: #4fc3f7 !important; 
+    color: #4fc3f7 !important; 
+    background: rgba(79,195,247,0.15) !important; 
+}
+
+#arch-hud .hud-close:hover { 
+    border-color: #ff6b6b !important; 
+    color: #ff6b6b !important; 
+    background: rgba(255,107,107,0.15) !important; 
+}
+
+#arch-hud .hud-body { 
+    overflow-y: auto !important; 
+    padding: 16px !important; 
+    flex: 1 !important; 
+    background: #0d0d0d !important;
+}
+
+/* #arch-hud .hud-body::-webkit-scrollbar { width: 5px !important; }
+#arch-hud .hud-body::-webkit-scrollbar-thumb { background: #333 !important; border-radius: 3px !important; } */
+
+#arch-hud .hud-stats {
+    display: flex !important;
+    gap: 8px !important;
+    margin-bottom: 16px !important;
+}
+
+#arch-hud .hud-stat-pill {
+    background: rgba(79,195,247,0.1) !important;
+    color: #4fc3f7 !important;
+    padding: 6px 10px !important;
+    border-radius: 6px !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    border: 1px solid rgba(79,195,247,0.25) !important;
+}
+
+#arch-hud .hud-list {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+}
+
+#arch-hud .hud-item {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 12px 14px !important;
+    background: #161616 !important;
+    border: 1px solid #2a2a2a !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+}
+
+#arch-hud .hud-item:hover {
+    border-color: #4fc3f7 !important;
+    background: rgba(79,195,247,0.08) !important;
+    transform: translateY(-1px) !important;
+}
+
+#arch-hud .hud-item-name {
+    font-size: 13px !important;
+    color: #fff !important;
+    font-weight: 700 !important;
+    margin-bottom: 2px !important;
+}
+
+#arch-hud .hud-item-type {
+    font-size: 10px !important;
+    color: #888 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+}
+
+#arch-hud .hud-item-right {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+#arch-hud .hud-item-count {
+    background: #2a2a2a !important;
+    color: #4fc3f7 !important;
+    padding: 3px 8px !important;
+    border-radius: 12px !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+}
+
+#arch-hud .hud-add-compare,
+#arch-hud .hud-jump-btn {
+    background: transparent !important;
+    border: 1px solid #444 !important;
+    color: #ccc !important;
+    border-radius: 4px !important;
+    width: 24px !important;
+    height: 24px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+}
+
+#arch-hud .hud-add-compare:hover,
+#arch-hud .hud-jump-btn:hover {
+    border-color: #4fc3f7 !important;
+    color: #4fc3f7 !important;
+    background: rgba(79,195,247,0.1) !important;
+}
+
+#arch-compare-panel {
+    display: none;
+    position: fixed !important;
+    bottom: 24px !important;
+    left: 24px !important;
+    width: 700px !important;
+    max-height: 600px !important;
+    background: #0d0d0d !important;
+    border: 1px solid #333 !important;
+    border-radius: 12px !important;
+    z-index: 2147483647 !important;
+    overflow-y: auto !important;
+    padding: 20px !important;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.9), 0 0 0 1px rgba(79,195,247,0.2) !important;
+    color: #e0e0e0 !important;
+    animation: archSlideUp 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+}
+
+#arch-compare-panel .compare-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-bottom: 20px !important;
+    padding-bottom: 16px !important;
+    border-bottom: 1px solid #2a2a2a !important;
+}
+
+#arch-compare-panel .compare-title {
+    color: #4fc3f7 !important;
+    font-weight: 800 !important;
+    font-size: 16px !important;
+    letter-spacing: 0.5px !important;
+}
+
+#arch-compare-panel .compare-header-actions {
+    display: flex !important;
+    gap: 10px !important;
+}
+
+#arch-compare-panel .compare-clear-btn {
+    background: rgba(255,107,107,0.1) !important;
+    border: 1px solid rgba(255,107,107,0.3) !important;
+    color: #ff6b6b !important;
+    padding: 6px 12px !important;
+    border-radius: 6px !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    transition: all 0.2s !important;
+}
+
+#arch-compare-panel .compare-clear-btn:hover { background: rgba(255,107,107,0.2) !important; }
+
+#arch-compare-panel .compare-close {
+    background: transparent !important;
+    border: 1px solid #444 !important;
+    color: #ccc !important;
+    width: 30px !important;
+    height: 30px !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+#arch-compare-panel .compare-close:hover { border-color: #fff !important; color: #fff !important; }
+
+#arch-compare-panel .compare-grid {
+    display: grid !important;
+    gap: 10px !important;
+}
+
+#arch-compare-panel .compare-cell {
+    background: #161616 !important;
+    border: 1px solid #2a2a2a !important;
+    padding: 12px !important;
+    border-radius: 8px !important;
+    color: #d4d4d4 !important;
+    font-size: 13px !important;
+    line-height: 1.5 !important;
+}
+
+#arch-compare-panel .compare-row-label {
+    background: transparent !important;
+    border: none !important;
+    color: #888 !important;
+    font-size: 11px !important;
+    text-transform: uppercase !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.5px !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+#arch-compare-panel .compare-arch-header {
+    background: rgba(79,195,247,0.1) !important;
+    border-color: rgba(79,195,247,0.4) !important;
+    color: #fff !important;
+    font-weight: 800 !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    font-size: 14px !important;
+}
+
+#arch-compare-panel .compare-remove-btn {
+    background: rgba(0,0,0,0.3) !important;
+    border: 1px solid #4fc3f7 !important;
+    color: #4fc3f7 !important;
+    border-radius: 4px !important;
+    width: 24px !important;
+    height: 24px !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: 0.2s !important;
+}
+
+#arch-compare-panel .compare-remove-btn:hover { background: #4fc3f7 !important; color: #000 !important; }
+
+#arch-compare-panel .compare-badge {
+    display: inline-block !important;
+    background: #222 !important;
+    border: 1px solid #444 !important;
+    color: #aaa !important;
+    padding: 3px 8px !important;
+    border-radius: 4px !important;
+    font-size: 11px !important;
+    margin: 2px !important;
+}
+
+/* =========================================================
+   SEARCH OVERLAY (Center Modal)
+========================================================= */
+#arch-search-overlay {
+    display: none; /* Let JavaScript control visibility */
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: rgba(0,0,0,0.75) !important;
+    backdrop-filter: blur(5px) !important;
+    z-index: 2147483647 !important;
+}
+
+#arch-search-overlay .search-modal {
+    position: absolute !important;
+    top: 40% !important; /* Slightly above center looks better */
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important; /* Perfectly centers it */
+    background: #0d0d0d !important;
+    border: 1px solid #333 !important;
+    border-radius: 12px !important;
+    width: 90% !important;
+    max-width: 500px !important; /* Shrunk from 600px */
+    padding: 24px !important;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.95), 0 0 0 1px rgba(79,195,247,0.2) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+    animation: archModalPop 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+}
+
+@keyframes archModalPop {
+    from { opacity: 0; transform: translate(-50%, -45%) scale(0.95); }
+    to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+#arch-search-overlay .search-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+}
+
+#arch-search-overlay .search-title {
+    color: #4fc3f7 !important;
+    font-size: 16px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.5px !important;
+}
+
+#arch-search-overlay .search-close {
+    background: transparent !important;
+    border: none !important;
+    color: #888 !important;
+    font-size: 18px !important;
+    cursor: pointer !important;
+    width: 24px !important;
+    height: 24px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 4px !important;
+    transition: all 0.15s !important;
+}
+
+#arch-search-overlay .search-close:hover { 
+    color: #ff6b6b !important; 
+    background: rgba(255,107,107,0.1) !important;
+}
+
+#arch-search-overlay .search-input {
+    width: 100% !important;
+    background: #141414 !important;
+    border: 1px solid #333 !important;
+    color: #fff !important;
+    padding: 14px 16px !important;
+    border-radius: 8px !important;
+    font-size: 14px !important;
+    outline: none !important;
+    box-sizing: border-box !important;
+    transition: all 0.2s !important;
+    font-family: -apple-system, sans-serif !important;
+}
+
+#arch-search-overlay .search-input:focus {
+    border-color: #4fc3f7 !important;
+    background: #1a1a1a !important;
+    box-shadow: 0 0 0 2px rgba(79,195,247,0.15) !important;
+}
+
+#arch-search-overlay .search-results {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    overflow-y: auto !important;
+    max-height: 350px !important;
+    padding-right: 6px !important;
+}
+/* 
+#arch-search-overlay .search-results::-webkit-scrollbar { width: 6px !important; }
+#arch-search-overlay .search-results::-webkit-scrollbar-thumb { background: #333 !important; border-radius: 4px !important; } */
+
+#arch-search-overlay .search-result-item {
+    background: #161616 !important;
+    border: 1px solid #2a2a2a !important;
+    padding: 14px !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    transition: all 0.15s !important;
+}
+
+#arch-search-overlay .search-result-item:hover {
+    border-color: #4fc3f7 !important;
+    background: rgba(79,195,247,0.05) !important;
+    transform: translateX(4px) !important;
+}
+
+#arch-search-overlay .search-result-name {
+    color: #fff !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    margin-bottom: 6px !important;
+}
+
+#arch-search-overlay .search-result-type {
+    display: inline-block !important;
+    background: #222 !important;
+    color: #aaa !important;
+    padding: 2px 6px !important;
+    border-radius: 4px !important;
+    font-size: 10px !important;
+    text-transform: uppercase !important;
+    margin-right: 8px !important;
+    font-weight: 700 !important;
+    border: 1px solid #333 !important;
+}
+
+#arch-search-overlay .search-result-desc {
+    color: #888 !important;
+    font-size: 12px !important;
+    line-height: 1.4 !important;
+}
+
+/* Active States for Tooltip Buttons */
+#arch-tooltip .tooltip-action-btn.active {
+    background: rgba(79,195,247,0.15) !important;
+    border-color: #4fc3f7 !important;
+    color: #4fc3f7 !important;
+}
+
+#arch-tooltip .tooltip-action-btn.bookmark-active {
+    background: rgba(249,171,0,0.15) !important;
+    border-color: #f9ab00 !important;
+    color: #f9ab00 !important;
+}
+
+/* Active State for HUD Compare Toggle (Turns Red when added) */
+#arch-hud .hud-add-compare.active {
+    border-color: #ff6b6b !important;
+    color: #ff6b6b !important;
+    background: rgba(255,107,107,0.1) !important;
+}
+#arch-hud .hud-add-compare.active:hover {
+    background: rgba(255,107,107,0.2) !important;
+}
+
+/* =========================================================
+   UNIFIED SCROLLBAR THEME (Matches Dark/Cyan UI)
+========================================================= */
+#arch-tooltip::-webkit-scrollbar,
+#arch-hud .hud-body::-webkit-scrollbar,
+#arch-compare-panel::-webkit-scrollbar,
+#arch-search-overlay .search-results::-webkit-scrollbar,
+#arch-tooltip .arch-math::-webkit-scrollbar,
+#arch-tooltip .arch-code::-webkit-scrollbar,
+#arch-tooltip .arch-graph-section div::-webkit-scrollbar, /* <-- Added inline graph container */
+#arch-keybind-guide::-webkit-scrollbar {
+    width: 6px !important;
+    height: 6px !important; 
+}
+
+/* Scrollbar Track (Background) */
+#arch-tooltip::-webkit-scrollbar-track,
+#arch-hud .hud-body::-webkit-scrollbar-track,
+#arch-compare-panel::-webkit-scrollbar-track,
+#arch-search-overlay .search-results::-webkit-scrollbar-track,
+#arch-tooltip .arch-math::-webkit-scrollbar-track,
+#arch-tooltip .arch-code::-webkit-scrollbar-track,
+#arch-tooltip .arch-graph-section div::-webkit-scrollbar-track,
+#arch-keybind-guide::-webkit-scrollbar-track {
+    background: transparent !important;
+}
+
+/* Scrollbar Thumb (The draggable part) */
+#arch-tooltip::-webkit-scrollbar-thumb,
+#arch-hud .hud-body::-webkit-scrollbar-thumb,
+#arch-compare-panel::-webkit-scrollbar-thumb,
+#arch-search-overlay .search-results::-webkit-scrollbar-thumb,
+#arch-tooltip .arch-math::-webkit-scrollbar-thumb,
+#arch-tooltip .arch-code::-webkit-scrollbar-thumb,
+#arch-tooltip .arch-graph-section div::-webkit-scrollbar-thumb,
+#arch-keybind-guide::-webkit-scrollbar-thumb {
+    background: rgba(79, 195, 247, 0.15) !important; 
+    border-radius: 10px !important;
+    border: 1px solid rgba(0, 0, 0, 0.2) !important; 
+}
+
+/* Scrollbar Thumb Hover State */
+#arch-tooltip::-webkit-scrollbar-thumb:hover,
+#arch-hud .hud-body::-webkit-scrollbar-thumb:hover,
+#arch-compare-panel::-webkit-scrollbar-thumb:hover,
+#arch-search-overlay .search-results::-webkit-scrollbar-thumb:hover,
+#arch-tooltip .arch-math::-webkit-scrollbar-thumb:hover,
+#arch-tooltip .arch-code::-webkit-scrollbar-thumb:hover,
+#arch-tooltip .arch-graph-section div::-webkit-scrollbar-thumb:hover,
+#arch-keybind-guide::-webkit-scrollbar-thumb:hover {
+    background: rgba(79, 195, 247, 0.5) !important; 
+}
+
+/* Scrollbar Corner (Where vertical and horizontal meet) */
+#arch-tooltip::-webkit-scrollbar-corner,
+#arch-hud .hud-body::-webkit-scrollbar-corner,
+#arch-compare-panel::-webkit-scrollbar-corner,
+#arch-search-overlay .search-results::-webkit-scrollbar-corner,
+#arch-tooltip .arch-math::-webkit-scrollbar-corner,
+#arch-tooltip .arch-code::-webkit-scrollbar-corner,
+#arch-tooltip .arch-graph-section div::-webkit-scrollbar-corner,
+#arch-keybind-guide::-webkit-scrollbar-corner {
+    background: transparent !important;
+}

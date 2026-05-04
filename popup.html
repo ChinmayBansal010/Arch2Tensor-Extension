@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Arch2Tensor</title>
+    <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+    <div id="app">
+        <header class="popup-header">
+            <div class="logo-row">
+                <div class="logo-icon">⬡</div>
+                <div class="logo-text">
+                    <span class="logo-name">Arch2Tensor</span>
+                    <span class="logo-tagline">Architecture Intelligence</span>
+                </div>
+                <div class="header-controls">
+                    <button id="help-btn" class="header-btn" title="Keyboard shortcuts (Press ?)">?</button>
+                    <label class="toggle" title="Enable / disable globally">
+                        <input type="checkbox" id="global-enabled" checked />
+                        <span class="toggle-track">
+                            <span class="toggle-thumb"></span>
+                        </span>
+                    </label>
+                </div>
+            </div>
+            <div class="status-bar" id="status-bar">
+                <span class="status-dot active" id="status-dot"></span>
+                <span id="status-text">Active on this page</span>
+            </div>
+        </header>
+
+        <div class="popup-body">
+            <div class="section">
+                <div class="section-label">This Page</div>
+                <div class="card">
+                    <div class="card-row" id="current-page-row">
+                        <div class="card-row-left">
+                            <span class="card-icon">🌐</span>
+                            <div>
+                                <div class="card-title" id="current-domain">—</div>
+                                <div class="card-subtitle" id="current-path">—</div>
+                            </div>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="page-enabled" checked />
+                            <span class="toggle-track">
+                                <span class="toggle-thumb"></span>
+                            </span>
+                        </label>
+                    </div>
+                    <div class="divider"></div>
+                    <div class="card-row">
+                        <div class="card-row-left">
+                            <span class="card-icon">🏠</span>
+                            <div>
+                                <div class="card-title" id="domain-label">Disable entire domain</div>
+                            </div>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="domain-enabled" checked />
+                            <span class="toggle-track">
+                                <span class="toggle-thumb"></span>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-label">Page Stats</div>
+                <div class="stats-grid" id="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-val" id="stat-mentions">—</div>
+                        <div class="stat-key">Mentions</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-val" id="stat-unique">—</div>
+                        <div class="stat-key">Unique</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-val" id="stat-db">—</div>
+                        <div class="stat-key">In DB</div>
+                    </div>
+                </div>
+                <div class="arch-chip-list" id="arch-chip-list"></div>
+            </div>
+
+            <div class="section">
+                <div class="section-label">Display</div>
+                <div class="card">
+                    <div class="card-row">
+                        <div class="card-row-left">
+                            <span class="card-icon">✨</span>
+                            <div class="card-title">Show highlights</div>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="setting-highlights" checked />
+                            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                        </label>
+                    </div>
+                    <div class="divider"></div>
+                    <div class="card-row">
+                        <div class="card-row-left">
+                            <span class="card-icon">🎛️</span>
+                            <div class="card-title">Show HUD panel</div>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="setting-hud" checked />
+                            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                        </label>
+                    </div>
+                    <div class="divider"></div>
+                    <div class="card-row">
+                        <div class="card-row-left">
+                            <span class="card-icon">🗂️</span>
+                            <div class="card-title">Domain Profile</div>
+                        </div>
+                        <select id="setting-profile" class="search-input" style="width: 140px; padding: 4px; margin-bottom: 0;">
+                            <option value="All">All Domains</option>
+                        </select>
+                    </div>
+                    <div class="divider"></div>
+                    <div class="card-row">
+                        <div class="card-row-left">
+                            <span class="card-icon">🎯</span>
+                            <div class="card-title">Confidence threshold</div>
+                        </div>
+                        <div class="slider-wrap">
+                            <input type="range" id="setting-confidence" min="0" max="100" step="10" value="0" class="slider" />
+                            <span class="slider-val" id="confidence-val">0%</span>
+                        </div>
+                    </div>
+                    <div class="divider"></div>
+                    <div class="card-row">
+                        <div class="card-row-left">
+                            <span class="card-icon">⌛</span>
+                            <div class="card-title">Scan delay (ms)</div>
+                        </div>
+                        <div class="slider-wrap">
+                            <input type="range" id="setting-delay" min="0" max="5000" step="200" value="1200" class="slider" />
+                            <span class="slider-val" id="delay-val">1200</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-label">Blocked Pages</div>
+                <div class="blocked-list" id="blocked-list">
+                    <div class="empty-blocked">No blocked pages yet</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-label">History</div>
+                <div class="history-list" id="history-list">
+                    <div class="empty-blocked">No pages scanned yet</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-label">📚 Library (Saved for Later)</div>
+                <div class="search-input-wrap">
+                    <input type="text" id="bookmarks-search" placeholder="🔍 Search saved architectures..." class="search-input" />
+                </div>
+                <div class="blocked-list" id="bookmarks-list">
+                    <div class="empty-blocked">No architectures saved yet</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-label">⚡ Quick Actions</div>
+                <div class="card">
+                    <div class="card-row">
+                        <div class="card-row-left">
+                            <span class="card-icon">💾</span>
+                            <div class="card-title">Export data</div>
+                        </div>
+                        <button class="action-btn" id="export-btn" title="Export all settings and bookmarks">→</button>
+                    </div>
+                    <div class="divider"></div>
+                    <div class="card-row">
+                        <div class="card-row-left">
+                            <span class="card-icon">🔄</span>
+                            <div class="card-title">Reset to defaults</div>
+                        </div>
+                        <button class="action-btn danger-btn" id="reset-btn" title="Reset all settings">↻</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-label">ℹ️ About</div>
+                <div class="about-card">
+                    <p><strong>Arch2Tensor v3.0</strong> - Architecture Intelligence</p>
+                    <p>An AI-powered extension that identifies and explains software architectures and patterns in real-time.</p>
+                    <div class="stats-footer">
+                        <span id="total-architectures">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="popup-footer">
+            <button class="footer-btn danger" id="clear-history-btn">🗑️ Clear History</button>
+            <button class="footer-btn" id="reload-btn">↺ Rescan Page</button>
+        </footer>
+    </div>
+
+    <div id="help-modal" class="help-modal">
+        <div class="help-modal-content">
+            <div class="help-modal-header">
+                <h2>Keyboard Shortcuts</h2>
+                <button id="help-close-btn" class="help-close-btn">✕</button>
+            </div>
+            <div class="help-modal-body">
+                <div class="shortcut-item">
+                    <div class="shortcut-keys">Alt + F</div>
+                    <div class="shortcut-desc">Toggle search overlay</div>
+                </div>
+                <div class="shortcut-item">
+                    <div class="shortcut-keys">Alt + H</div>
+                    <div class="shortcut-desc">Toggle HUD panel</div>
+                </div>
+                <div class="shortcut-item">
+                    <div class="shortcut-keys">Alt + C</div>
+                    <div class="shortcut-desc">Toggle compare panel</div>
+                </div>
+                <div class="shortcut-item">
+                    <div class="shortcut-keys">Alt + →</div>
+                    <div class="shortcut-desc">Next highlight</div>
+                </div>
+                <div class="shortcut-item">
+                    <div class="shortcut-keys">Alt + ←</div>
+                    <div class="shortcut-desc">Previous highlight</div>
+                </div>
+                <div class="shortcut-item">
+                    <div class="shortcut-keys">?</div>
+                    <div class="shortcut-desc">Toggle help guide</div>
+                </div>
+                <div class="shortcut-item">
+                    <div class="shortcut-keys">Esc</div>
+                    <div class="shortcut-desc">Close tooltips & panels</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>
