@@ -1,5 +1,5 @@
 // const API_URL = "http://127.0.0.1:8000/architectures";
-const API_URL = "https://arch2tensor-api.onrender.com/architectures";
+const API_URL = "https://arch2tensor.onrender.com/architectures";
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "getArchitectureCount") {
